@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WOLFSTATION: CRIMSON DESERT</title>
+    <!-- Fonts: Cinzel for Epic Titles, Lora for Lore, Oswald for bold UI -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Lora:ital,wght@0,400;0,700;1,400&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ws: {
+                            bg: '#0a0a0a',        
+                            leather: '#1c140d',      
+                            crimson: '#991b1b',   
+                            crimsonDark: '#450a0a',
+                            gold: '#d97706',       
+                            steel: '#94a3b8',
+                            parchment: '#fef3c7',
+                            magic: '#8b5cf6' 
+                        }
+                    },
+                    fontFamily: {
+                        epic: ['Cinzel', 'serif'],
+                        lore: ['Lora', 'serif'],
+                        ui: ['Oswald', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* MEDIEVAL RPG STYLING */
+        body {
+            background-color: #0a0a0a;
+            color: #e2e8f0;
+            font-family: 'Lora', serif;
+            overflow: hidden;
+            margin: 0;
+            /* Dark Stone/Leather Background */
+            background-image: 
+                radial-gradient(circle at top right, rgba(153, 27, 27, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at bottom left, rgba(217, 119, 6, 0.05) 0%, transparent 50%),
+                url("https://www.transparenttextures.com/patterns/black-scales.png");
+        }
+
+        /* Ember Particles */
+        body::before {
+            content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #d97706, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 40px 70px, #ef4444, rgba(0,0,0,0)),
+                radial-gradient(1.5px 1.5px at 90px 40px, #fcd34d, rgba(0,0,0,0));
+            background-size: 200px 200px;
+            animation: emberRise 20s linear infinite;
+            opacity: 0.4;
+        }
+        @keyframes emberRise { 0% { transform: translateY(100vh); } 100% { transform: translateY(-100vh); } }
+
+        h1, h2, h3, .font-epic { font-family: 'Cinzel', serif; letter-spacing: 1px; }
+        .font-ui { font-family: 'Oswald', sans-serif; letter-spacing: 1px; text-transform: uppercase; }
+
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-6px); } 100% { transform: translateY(0px); } }
+
+        /* Medieval Panels */
+        .ws-panel {
+            background: linear-gradient(135deg, rgba(28, 20, 13, 0.95), rgba(10, 10, 10, 0.98));
+            backdrop-filter: blur(10px);
+            border: 2px solid #3f2c1d;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(153, 27, 27, 0.1);
+            border-radius: 4px; 
+            transition: all 0.3s ease; position: relative;
+        }
+        
+        /* Steel Corners */
+        .ws-panel::before, .ws-panel::after {
+            content: ''; position: absolute; width: 12px; height: 12px;
+            background: #94a3b8; box-shadow: 0 0 5px #000;
+        }
+        .ws-panel::before { top: -2px; left: -2px; border-radius: 50% 0 50% 50%; }
+        .ws-panel::after { bottom: -2px; right: -2px; border-radius: 50% 50% 0 50%; }
+
+        /* Interactive Elements */
+        .interactive-card { cursor: pointer; transition: all 0.3s; border-left: 4px solid #d97706; }
+        .interactive-card:hover { transform: translateX(5px); box-shadow: 0 10px 20px rgba(0,0,0,0.8); background-color: rgba(217, 119, 6, 0.05); }
+
+        /* Interactive Loot Mechanics */
+        .loot-item { cursor: pointer; transition: all 0.3s; transform-origin: center; position: relative;}
+        .loot-item:hover { transform: scale(1.1) translateY(-5px); filter: drop-shadow(0 0 15px rgba(217, 119, 6, 0.8)); }
+        .loot-item.looted { opacity: 0.5; pointer-events: none; filter: grayscale(100%); transform: scale(0.9); }
+
+        /* THE MERCENARY SCRIPT UI */
+        .elder-scroll-container {
+            background-color: #fef3c7;
+            background-image: url('https://www.transparenttextures.com/patterns/aged-paper.png');
+            border: 8px solid #3f2c1d;
+            border-style: double;
+            color: #450a0a;
+            border-radius: 4px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 40px rgba(120, 53, 15, 0.4);
+            position: relative;
+        }
+        
+        .script-word {
+            display: inline-block; cursor: pointer; font-weight: bold; color: #991b1b;
+            border-bottom: 2px dashed #991b1b; transition: all 0.2s; padding: 0 4px;
+            position: relative; z-index: 20;
+        }
+        .script-word:hover { background-color: rgba(153, 27, 27, 0.1); border-bottom-style: solid; transform: scale(1.05); }
+        .script-word.active-word { background-color: #991b1b; color: #fef3c7; box-shadow: 0 0 10px rgba(153,27,27,0.5); border-radius: 2px;}
+
+        /* RPG Buttons */
+        .ws-btn {
+            background: linear-gradient(to bottom, #3f2c1d, #1c140d); 
+            color: #fef3c7; font-family: 'Cinzel', serif; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            border: 1px solid #78350f; border-bottom: 3px solid #000; border-radius: 2px; 
+            padding: 0.75rem 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.8);
+            transition: all 0.15s; cursor: pointer; position: relative;
+        }
+        .ws-btn:hover { background: linear-gradient(to bottom, #991b1b, #450a0a); color: #fff; border-color: #ef4444; }
+        .ws-btn:active { transform: translateY(2px); border-bottom-width: 1px; }
+
+        .ws-btn.gold { background: linear-gradient(to bottom, #b45309, #78350f); border-color: #f59e0b; color: #fff; }
+        .ws-btn.gold:hover { background: linear-gradient(to bottom, #d97706, #92400e); box-shadow: 0 0 15px rgba(217, 119, 6, 0.5); }
+
+        /* Lockpicking Minigame */
+        .lock-container { position: relative; width: 120px; height: 120px; margin: 0 auto 2rem auto; }
+        .lock-circle { width: 100%; height: 100%; border: 8px solid #94a3b8; border-radius: 50%; border-top-color: transparent; animation: spin 4s linear infinite; }
+        .lock-inner { position: absolute; inset: 15px; background: #3f2c1d; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #d97706; box-shadow: inset 0 0 15px #000; transition: all 0.3s;}
+        .lock-inner.unlocked { background: #166534; border-color: #4ade80; box-shadow: 0 0 30px #4ade80; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        
+        .word-bank-btn { background: #1c140d; border: 1px solid #d97706; color: #fef3c7; transition: all 0.2s; cursor: pointer; font-family: 'Cinzel', serif; padding: 0.5rem 1.5rem; font-weight: bold;}
+        .word-bank-btn:hover { background: #d97706; color: #000; box-shadow: 0 0 10px rgba(217, 119, 6, 0.5); }
+        .word-bank-btn.hidden-word { opacity: 0; pointer-events: none; transform: scale(0.8); }
+
+        /* Level Layout */
+        .level {
+            display: none; opacity: 0; width: 100%; min-height: 100%;
+            flex-direction: column; position: relative; z-index: 10; padding: 1.5rem;
+        }
+        .level.active { display: flex; animation: fadeLevel 0.5s ease-out forwards; }
+        .level.active::before, .level.active::after { content: ''; margin: auto; }
+        
+        .page-content {
+            margin: auto; width: 100%; max-width: 900px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; flex-shrink: 0; padding: 1rem 0;
+        }
+
+        @keyframes fadeLevel { 0% { opacity: 0; transform: scale(0.98); } 100% { opacity: 1; transform: scale(1); } }
+
+        /* Loading Screen */
+        #loading-screen {
+            position: fixed; inset: 0; background: #050505; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 1; transition: opacity 0.8s ease-in-out;
+        }
+
+        /* Class Selection */
+        .class-card {
+            transition: all 0.3s; cursor: pointer; border: 1px solid #3f2c1d;
+            background: #1c140d; filter: grayscale(100%); border-radius: 4px;
+        }
+        .class-card:hover { filter: grayscale(0%); transform: translateY(-5px); border-color: #d97706; }
+        .class-card.selected { filter: grayscale(0%); border-color: #d97706; box-shadow: 0 0 20px rgba(217, 119, 6, 0.4); background: rgba(217, 119, 6, 0.1); }
+
+        /* Damage & Praise */
+        #damage-overlay {
+            position: fixed; inset: 0; pointer-events: none; z-index: 9000; opacity: 0; transition: opacity 0.3s;
+            box-shadow: inset 0 0 100px rgba(153, 27, 27, 0.8); background: rgba(153, 27, 27, 0.15);
+        }
+        .take-damage { animation: flashBlood 0.5s forwards; }
+        @keyframes flashBlood { 0% { opacity: 1; } 100% { opacity: 0; } }
+
+        .toast-anim { animation: toastUp 2.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes toastUp {
+            0% { transform: translate(-50%, 20px) scale(0.8); opacity: 0; }
+            10% { transform: translate(-50%, 0) scale(1.1); opacity: 1; filter: drop-shadow(0 0 15px rgba(217, 119, 6, 0.6)); }
+            15% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+            90% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -20px) scale(0.8); opacity: 0; }
+        }
+
+        .speaking-starter {
+            background: rgba(217, 119, 6, 0.1); border-left: 3px solid #d97706;
+            padding: 0.5rem 1rem; border-radius: 0 4px 4px 0; margin-top: 10px;
+            font-family: 'Lora', serif; font-size: 1.1rem; color: #fef3c7; font-style: italic;
+        }
+
+        .nav-bar { width: 100%; max-width: 7xl; display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 1rem 0 1rem; flex-shrink: 0; margin-top: auto; z-index: 20; }
+    </style>
+</head>
+<body class="flex flex-col h-screen w-screen selection:bg-ws-crimson selection:text-white">
+
+    <div id="damage-overlay"></div>
+
+    <!-- LOADING SCREEN -->
+    <div id="loading-screen">
+        <div class="relative w-full max-w-sm md:max-w-md mx-auto mb-8 animate-float flex flex-col items-center">
+            <div class="absolute inset-0 bg-ws-crimson blur-[60px] opacity-20 pointer-events-none"></div>
+            <img src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/3321460/d76689d0bd0a77b863a64b08760b8dd1c5b50081/capsule_616x353.jpg?t=1777016399" alt="Crimson Desert Cover" class="relative z-10 w-full h-auto object-cover rounded shadow-[0_0_30px_rgba(153,27,27,0.5)] border-2 border-ws-crimson">
+            <h1 class="text-4xl md:text-5xl font-epic font-bold text-white mt-6 tracking-[0.2em] text-center drop-shadow-[0_0_10px_#991b1b]">CRIMSON DESERT</h1>
+        </div>
+        
+        <button id="start-btn" onclick="pressStart()" class="font-epic text-xl font-bold text-ws-parchment bg-ws-crimson border-2 border-ws-crimsonDark px-10 py-4 hover:bg-ws-crimsonDark transition-all uppercase tracking-widest z-20 shadow-[0_0_15px_rgba(153,27,27,0.5)]">Enter Pywel</button>
+        
+        <div id="loading-ui" class="hidden flex-col items-center mt-4 z-20">
+            <i class="fas fa-campground text-ws-gold text-3xl mb-4 animate-pulse"></i>
+            <p class="font-epic text-ws-gold tracking-widest uppercase text-sm animate-pulse mb-3 drop-shadow-md">Loading World...</p>
+            <p class="font-lore text-gray-400 text-sm border border-gray-800 p-3 bg-black/80 max-w-sm text-center shadow-inner italic">Level A2: Past Continuous. Actions in progress in the past.</p>
+        </div>
+    </div>
+
+    <!-- PRAISE SYSTEM -->
+    <div id="praise-popup" class="fixed top-[12%] left-1/2 hidden z-[10000] pointer-events-none transform -translate-x-1/2">
+        <div class="bg-ws-leather/95 px-8 py-3 border-2 border-ws-gold flex items-center gap-4 shadow-[0_0_40px_rgba(217,119,6,0.3)] rounded-sm">
+            <span id="praise-icon" class="text-3xl drop-shadow-md">⚔️</span>
+            <span id="praise-text" class="text-ws-gold font-bold text-lg md:text-xl uppercase tracking-widest font-epic text-shadow"></span>
+        </div>
+    </div>
+
+    <!-- DM TOOLS (MERCENARY LEDGER) -->
+    <div id="dm-tools" class="fixed top-[80px] left-4 z-50">
+        <button onclick="toggleTools()" class="bg-ws-leather text-ws-gold w-12 h-12 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(217,119,6,0.4)] hover:scale-110 transition border border-ws-gold">
+            <i class="fas fa-coins text-xl"></i>
+        </button>
+        <div id="tools-panel" class="absolute top-14 left-0 ws-panel p-6 w-80 hidden flex-col gap-4 border-l-4 border-l-ws-gold">
+            <h3 class="font-epic text-ws-gold text-lg tracking-widest border-b border-ws-gold/20 pb-2 text-center">DM LEDGER</h3>
+            
+            <div class="grid grid-cols-2 gap-2 mt-2">
+                <button onclick="addXP(10)" class="ws-btn py-2 text-sm rounded">+10 COINS</button>
+                <button onclick="addXP(50)" class="ws-btn py-2 text-sm rounded">+50 COINS</button>
+            </div>
+            
+            <button onclick="damageArmor()" class="ws-btn red py-3 text-sm flex items-center justify-center gap-2 mt-2">
+                <i class="fas fa-tint"></i> INFLICT WOUND
+            </button>
+        </div>
+    </div>
+
+    <!-- TOP HUD -->
+    <header class="h-16 shrink-0 bg-ws-leather/95 backdrop-blur-md border-b-2 border-ws-crimson/30 z-40 flex items-center justify-between px-4 md:px-8 relative shadow-lg">
+        <div class="flex items-center gap-4 md:gap-6">
+            <!-- Vitality (HP) -->
+            <div class="bg-black/60 px-4 py-2 rounded-sm border border-ws-crimson/30 flex items-center gap-2 shadow-inner">
+                <i class="fas fa-heart text-ws-crimson text-xl drop-shadow-[0_0_5px_#991b1b]" id="hp-1"></i>
+                <i class="fas fa-heart text-ws-crimson text-xl drop-shadow-[0_0_5px_#991b1b]" id="hp-2"></i>
+                <i class="fas fa-heart text-ws-crimson text-xl drop-shadow-[0_0_5px_#991b1b]" id="hp-3"></i>
+            </div>
+            <div class="flex flex-col hidden sm:flex">
+                <span class="text-[9px] text-gray-400 font-ui tracking-widest uppercase font-bold">Mercenary Name</span>
+                <span id="hud-player-name" class="text-xs text-ws-parchment font-bold font-epic uppercase tracking-wider">Teacher</span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3 md:gap-4">
+            <!-- Coins (XP) -->
+            <div class="flex items-center gap-2 bg-black/60 px-4 py-2 rounded-sm border border-ws-gold/30 hidden lg:flex shadow-inner">
+                <i class="fas fa-coins text-ws-gold drop-shadow-[0_0_5px_#d97706]"></i>
+                <span id="xp-counter" class="font-ui text-lg text-white tracking-widest">0 COINS</span>
+            </div>
+            
+            <button onclick="toggleFullscreen()" class="font-ui text-[10px] md:text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest hidden sm:block border border-gray-700 px-2 py-1">
+                [ Fullscreen ]
+            </button>
+
+            <button onclick="toggleNotes()" class="font-epic text-[10px] md:text-xs font-bold ws-btn py-1.5 px-4">
+                📜 JOURNAL
+            </button>
+        </div>
+    </header>
+
+    <!-- WHITEBOARD (JOURNAL) -->
+    <div id="notes-panel" class="fixed top-16 bottom-16 right-0 w-full max-w-md bg-ws-leather/95 backdrop-blur-2xl border-l-4 border-ws-crimson z-50 translate-x-full flex flex-col shadow-[-10px_0px_30px_rgba(0,0,0,0.8)] transition-transform duration-400 text-ws-parchment">
+        <div class="p-4 border-b border-ws-crimson/30 bg-[#2a1b12] flex justify-between items-center shrink-0">
+            <h2 class="font-bold uppercase tracking-widest text-sm md:text-base flex items-center gap-2 text-ws-gold font-epic drop-shadow-sm">
+                📖 Mercenary Journal
+            </h2>
+            <button onclick="toggleNotes()" class="text-gray-400 hover:text-white font-black text-2xl px-2 transition-colors">✕</button>
+        </div>
+        <div class="flex-1 w-full p-4 overflow-hidden flex flex-col bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')] bg-[#e2d3b3]">
+            <p class="text-[10px] font-ui text-gray-600 uppercase tracking-widest mb-2 px-1 font-bold">Notes & Contracts...</p>
+            <textarea id="class-notes" class="flex-1 w-full bg-transparent text-[#450a0a] border border-[#78350f] rounded outline-none p-4 font-lore text-lg leading-relaxed resize-none placeholder-[#92400e]" placeholder="> Write your lore here..."></textarea>
+        </div>
+    </div>
+
+    <main class="flex-1 w-full relative z-10 overflow-y-auto scroll-smooth pt-4 pb-16 double-click-area">
+        <div class="w-full h-full relative" id="levels-container">
+            
+            <!-- PAGE 1: TEACHER'S GUIDE -->
+            <section class="level active">
+                <div class="page-content">
+                    <h2 class="font-ui font-bold tracking-widest mb-2 uppercase text-sm text-ws-gold">Guild Master</h2>
+                    <h1 class="text-4xl md:text-6xl font-epic font-bold text-white mb-6 tracking-tight">Mission Briefing</h1>
+                    
+                    <div class="ws-panel p-8 max-w-2xl w-full text-lg leading-relaxed text-gray-300 text-left border-l-4 border-ws-crimson">
+                        <p class="mb-4 font-bold text-xl border-b border-gray-700 pb-3 text-white uppercase font-epic flex items-center gap-3">
+                            <span class="text-2xl">⚔️</span> Target: Elementary/Pre-Intermediate (A2).
+                        </p>
+                        <p class="mb-5 font-lore">Welcome to Pywel. It is a brutal medieval world of mercenaries, monsters, and war. Give the student mouse control to select their path and solve the RPG puzzles.</p>
+                        <div class="bg-black/50 p-5 border border-gray-700 rounded-sm shadow-inner">
+                            <h3 class="font-epic uppercase text-sm mb-3 text-ws-gold tracking-widest font-bold">Skill Tree:</h3>
+                            <ul class="list-none pl-1 space-y-3 font-lore text-base">
+                                <li class="flex items-center gap-3"><span class="text-xl text-ws-crimson">📜</span> <strong>Grammar:</strong> Past Continuous (e.g., "You were expecting me").</li>
+                                <li class="flex items-center gap-3"><span class="text-xl text-ws-gold">🗡️</span> <strong>Active Vocab:</strong> Interactive Script & Looting (Stolen, Expecting, Clawing).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-bar">
+                    <div class="w-32"></div>
+                    <button onclick="nextPage()" class="ws-btn px-10 py-4 text-xl">ENTER THE TAVERN <i class="fas fa-arrow-right ml-3"></i></button>
+                </div>
+            </section>
+
+            <!-- PAGE 2: CLASS SELECTION -->
+            <section class="level">
+                <div class="page-content">
+                    <h2 class="font-epic text-4xl md:text-5xl text-white mb-4 text-center tracking-widest drop-shadow-[0_0_15px_rgba(217,119,6,0.3)]">CHOOSE YOUR CLASS</h2>
+                    <p class="text-xl text-gray-400 font-lore italic text-center mb-10">"A mercenary is only as good as their weapon or spell."</p>
+                    
+                    <div class="max-w-6xl w-full">
+                        <input type="text" id="player-name-input" placeholder="ENTER MERCENARY NAME" class="bg-black/80 border border-ws-gold/50 text-white text-center font-epic text-2xl py-4 px-8 uppercase tracking-widest focus:border-ws-gold focus:shadow-[0_0_15px_rgba(217,119,6,0.3)] outline-none w-full mb-10 rounded-sm">
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div class="class-card p-6 text-center" onclick="selectClass('WARRIOR', 'fa-khanda', this)">
+                                <i class="fas fa-khanda text-5xl text-ws-steel mb-4 drop-shadow-md"></i>
+                                <h3 class="font-epic text-xl text-white mb-2 tracking-widest">WARRIOR</h3>
+                                <p class="text-gray-400 font-lore border-t border-white/10 pt-4 italic">Masters of the sword.</p>
+                                <p class="text-sm text-gray-500 mt-2">You fight your enemies face-to-face.</p>
+                            </div>
+                            <div class="class-card p-6 text-center" onclick="selectClass('RANGER', 'fa-bow-arrow', this)">
+                                <i class="fas fa-bow-arrow text-5xl text-green-600 mb-4 drop-shadow-md"></i>
+                                <h3 class="font-epic text-xl text-white mb-2 tracking-widest">RANGER</h3>
+                                <p class="text-gray-400 font-lore border-t border-white/10 pt-4 italic">Swift and silent.</p>
+                                <p class="text-sm text-gray-500 mt-2">You use a bow and survive in the wild.</p>
+                            </div>
+                            <div class="class-card p-6 text-center" onclick="selectClass('DEFENDER', 'fa-shield-alt', this)">
+                                <i class="fas fa-shield-alt text-5xl text-ws-gold mb-4 drop-shadow-md"></i>
+                                <h3 class="font-epic text-xl text-white mb-2 tracking-widest">DEFENDER</h3>
+                                <p class="text-gray-400 font-lore border-t border-white/10 pt-4 italic">The human wall.</p>
+                                <p class="text-sm text-gray-500 mt-2">You use heavy armor to protect your friends.</p>
+                            </div>
+                            <div class="class-card p-6 text-center" onclick="selectClass('MAGE', 'fa-hat-wizard', this)">
+                                <i class="fas fa-hat-wizard text-5xl text-ws-magic mb-4 drop-shadow-md"></i>
+                                <h3 class="font-epic text-xl text-white mb-2 tracking-widest">MAGE</h3>
+                                <p class="text-gray-400 font-lore border-t border-white/10 pt-4 italic">Masters of the arcane.</p>
+                                <p class="text-sm text-gray-500 mt-2">You use magic to control the battlefield.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-bar">
+                    <button onclick="prevPage()" class="text-gray-500 hover:text-white uppercase font-epic tracking-widest transition text-lg"><i class="fas fa-arrow-left mr-2"></i> Back</button>
+                    <button id="btn-confirm-char" onclick="confirmCharacter()" class="ws-btn gold px-10 py-4 text-xl disabled-btn" disabled>SIGN CONTRACT <i class="fas fa-file-signature ml-3"></i></button>
+                </div>
+            </section>
+
+            <!-- PAGE 3: WARM UP 1 (The 100 Hour Journey) -->
+            <section class="level">
+                <div class="page-content">
+                    <h2 class="font-ui font-bold tracking-widest mb-2 uppercase text-sm text-ws-gold">Campfire Talk</h2>
+                    <h1 class="text-3xl md:text-5xl font-bold font-epic text-white mb-8 tracking-tight">The 100-Hour Campaign</h1>
+                    
+                    <div class="ws-panel p-8 max-w-2xl w-full text-center hover:border-ws-gold transition-colors">
+                        <span class="text-6xl mb-6 block drop-shadow-lg">⏳</span>
+                        <p class="text-2xl md:text-3xl font-bold mb-8 text-white leading-relaxed font-epic">
+                            "Massive RPGs like Crimson Desert can take more than 100 hours to finish. Do you have the patience to play a game this long?"
+                        </p>
+                        <div class="bg-black/50 p-5 rounded-sm border-l-4 border-ws-gold text-left shadow-inner">
+                            <p class="font-bold text-ws-gold font-ui text-sm mb-3 tracking-widest uppercase">🗣️ Discuss:</p>
+                            <div class="speaking-starter">"I [ have / don't have ] patience for long games because..."</div>
+                            <div class="speaking-starter">"The longest game/series I ever played/watched was..."</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-bar">
+                    <button onclick="prevPage()" class="text-gray-500 hover:text-white uppercase font-epic tracking-widest transition text-lg"><i class="fas fa-arrow-left mr-2"></i> Back</button>
+                    <button onclick="nextPage()" class="ws-btn px-8 py-4 text-lg">NEXT <i class="fas fa-arrow-right ml-2"></i></button>
+                </div>
+            </section>
+
+            <!-- PAGE 4: WARM UP 2 (Monsters vs Men) -->
+            <section class="level">
+                <div class="page-content">
+                    <h2 class="font-ui font-bold tracking-widest mb-2 uppercase text-sm text-ws-crimson">Campfire Talk</h2>
+                    <h1 class="text-3xl md:text-5xl font-bold font-epic text-white mb-8 tracking-tight">Monsters & Men</h1>
+                    
+                    <div class="ws-panel p-8 max-w-2xl w-full text-center hover:border-ws-crimson transition-colors">
+                        <span class="text-6xl mb-6 block drop-shadow-lg">🐉</span>
+                        <p class="text-3xl font-bold mb-8 text-white leading-relaxed font-epic">
+                            "What is more dangerous in a medieval world: Giant monsters or other humans?"
+                        </p>
+                        <div class="bg-black/50 p-5 rounded-sm border-l-4 border-ws-crimson text-left shadow-inner">
+                            <p class="font-bold text-ws-crimson font-ui text-sm mb-3 tracking-widest uppercase">🗣️ Discuss:</p>
+                            <div class="speaking-starter !border-ws-crimson">"I think [ monsters / humans ] are more dangerous because..."</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-bar">
+                    <button onclick="prevPage()" class="text-gray-500 hover:text-white uppercase font-epic tracking-widest transition text-lg"><i class="fas fa-arrow-left mr-2"></i> Back</button>
+                    <button onclick="nextPage()" class="ws-btn px-8 py-4 text-lg">EXPLORE CAMP <i class="fas fa-campground ml-2"></i></button>
+                </div>
+            </section>
+
+            <!-- PAGE 5: ACTIVE VOCABULARY (Interactive Looting) -->
+            <section class="level">
+                <div class="page-content">
+                    <h2 class="font-ui font-bold tracking-widest mb-2 uppercase text-sm text-ws-gold drop-shadow-md">Bandit Camp</h2>
+                    <h1 class="text-4xl md:text-5xl font-bold font-epic text-white mb-6 tracking-tight">Loot the Chest</h1>
+                    <p class="text-lg font-ui bg-black/60 px-5 py-2 border border-ws-gold/30 mb-8 text-gray-300 rounded shadow-inner uppercase tracking-widest">Click the items inside the chest to uncover the vocabulary for the next scene.</p>
+
+                    <div class="ws-panel p-8 md:p-12 w-full max-w-4xl bg-black/60 border-t-4 border-ws-gold shadow-[0_0_30px_rgba(217,119,6,0.15)]">
+                        <div class="flex justify-center gap-8 flex-wrap" id="loot-container">
+                            
+                            <!-- Loot 1 -->
+                            <div class="loot-item flex flex-col items-center" onclick="lootItem(this, `STOLEN`, `Taken without permission. (Roubado)`, `The bandit had stolen gold in his pocket.`)">
+                                <i class="fas fa-ring text-6xl text-yellow-400 drop-shadow-[0_0_10px_#facc15] mb-4"></i>
+                                <span class="font-epic font-bold text-sm text-gray-400 mt-2">Gold Ring</span>
+                            </div>
+
+                            <!-- Loot 2 -->
+                            <div class="loot-item flex flex-col items-center" onclick="lootItem(this, `DEATH'S DOOR`, `Very close to dying.`, `After the dragon attack, he was at death's door.`)">
+                                <i class="fas fa-flask text-6xl text-red-500 drop-shadow-[0_0_10px_#ef4444] mb-4"></i>
+                                <span class="font-epic font-bold text-sm text-gray-400 mt-2">Health Potion</span>
+                            </div>
+
+                            <!-- Loot 3 -->
+                            <div class="loot-item flex flex-col items-center" onclick="lootItem(this, `CLAWING`, `Using nails or hands to fight hard and climb back.`, `The bear was clawing the tree.`)">
+                                <i class="fas fa-hand-paper text-6xl text-gray-400 drop-shadow-[0_0_10px_#9ca3af] mb-4"></i>
+                                <span class="font-epic font-bold text-sm text-gray-400 mt-2">Iron Gauntlet</span>
+                            </div>
+
+                        </div>
+
+                        <!-- Display Area for Looted Item -->
+                        <div id="loot-display" class="mt-10 bg-black/80 border border-gray-700 p-6 min-h-[120px] flex items-center justify-center hidden rounded shadow-inner text-left"></div>
+                    </div>
+                </div>
+                <div class="nav-bar">
+                    <button onclick="prevPage()" class="text-gray-500 hover:text-white uppercase font-epic tracking-widest transition text-lg"><i class="fas fa-arrow-left mr-2"></i> Back</button>
+                    <button id="btn-loot-next" onclick="nextPage()" class="ws-btn px-10 py-4 text-xl hidden fade-in">PROCEED <i class="fas fa-arrow-right ml-3"></i></button>
+                </div>
+            </section>
+
+            <!-- PAGE 6: PRE-VIDEO WARNING -->
+            <section class="level">
+                <div class="page-content">
+                    <div class="max-w-4xl ws-panel p-16 md:p-20 text-center w-full relative border-t-4 border-ws-crimson">
+                        <i class="fas fa-eye text-6xl md:text-7xl text-ws-crimson mb-10 drop-shadow-[0_0_20px_#991b1b] animate-pulse"></i>
+                        <h2 class="font-epic font-bold text-4xl md:text-5xl text-white mb-8 leading-relaxed tracking-widest uppercase">
+                            The World of Pywel
+                        </h2>
+                        <p class="text-2xl font-lore text-gray-300 italic">Watch the trailer. Pay close attention to the epic boss fight and the dialogue at the beginning.</p>
+                    </div>
+                </div>
+                <div class="nav-bar">
+                    <button onclick="prevPage()" class="text-gray-500 hover:text-white uppercase font-epic tracking-widest transition text-lg"><i class="fas fa-arrow-left mr-2"></i> Back</button>
+                    <button onclick="nextPage()" class="ws-btn px-12 py-5 text-xl uppercase">WATCH TRAILER</button>
+                </div>
+            </section>
+
+            <!-- PAGE 7: THE TRAILER -->
+            <section class="level h-full">
+                <div class="page-content h-full w-full max-w-5xl mx-auto justify-center">
+                    <h2 class="font-ui font-bold tracking-[0.2em] mb-2 uppercase text-sm text-ws-crimson text-center drop-shadow-md">Cinematic</h2>
+                    <h1 class="text-3xl md:text-4xl font-bold font-epic uppercase mb-6 text-center text-white">Crimson Desert</h1>
+                    
+                    <div class="w-full aspect-video border-2 border-gray-700 shadow-[0_0_30px_rgba(0,0,0,0.8)] relative shrink-0 bg-black p-1 rounded-sm">
+                        <!-- Crimson Desert Trailer -->
+                        <iframe class="w-full h-full" src="https://www.youtube.com/embed/YHhwdyWkwTQ?rel=0" frameborder="0" allowfullscreen></iframe>
+                    </div>
+                </div>
+                <div class="nav-bar">
+                    <button onclick="prevPage()" class="text-gray-500 hover:text-white uppercase font-epic tracking-widest transition text-lg"><i class="fas fa-arrow-left mr-2"></i> Back</button>
+                    <button onclick="nextPage()" class="ws-btn px-10 py-4 text-xl">PROCEED <i class="fas fa-arrow-right ml-3"></i></button>
+                </div>
+            </section>
+
+            <!-- PAGE 8: POST-VIDEO IMPRESSIONS -->
+            <section class="level">
+                <div class="page-content">
+                    <h2 class="font-ui font-bold tracking-widest mb-2 uppercase text-sm text-ws-gold">Debriefing</h2>
+                    <h1 class="text-3xl md:text-5xl font-bold font-epic text-white mb-8 tracking-tight">First Impressions</h1>
+                    
+                    <div class="ws-panel p-8 max-w-3xl w-full text-center border-t-4 border-ws-gold">
+                        <span class="text-6xl mb-6 block">🎬</span>
+                        <p class="text-3xl font-bold mb-8 text-white leading-relaxed font-epic">
+                            "What caught your attention the most in the video?"
+                        </p>
+                        <div class="bg-black/50 p-5 rounded-sm border border-gray-700 text-left shadow-inner">
+                            <p class="font-bold text-ws-gold font-ui text-sm mb-3 tracking-widest uppercase">🗣️ Speak:</p>
+                            <div class="speaking-starter mb-3">"I thought the boss fight was [ amazing / brutal / fast ]."</div>
+                            <div class="speaking-starter mb-3">"The graphics are very [ realistic / beautiful ]."</div>
+                            <div class="speaking-starter">"If I fought that boss, I would..."</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-bar">
+                    <button onclick="prevPage()" class="text-gray-500 hover:text-white uppercase font-epic tracking-widest transition text-lg"><i class="fas fa-arrow-left mr-2"></i> Back</button>
+                    <button onclick="nextPage()" class="ws-btn px-8 py-4 text-lg">READ THE CONTRACT <i class="fas fa-scroll ml-2"></i></button>
+                </div>
+            </section>
+
+            <!-- PAGE 9: THE INTERACTIVE SCRIPT (BEAUTIFUL PARCHMENT) -->
+            <section class="level">
+                <div class="page-content">
+                    <h2 class="font-ui font-bold tracking-widest mb-2 uppercase text-sm text-ws-crimson text-center">Interactive Script</h2>
+                    <h1 class="text-3xl md:text-5xl font-bold font-epic text-white mb-6 tracking-tight text-center">The White Horn</h1>
+                    <p class="text-lg font-ui bg-black/60 px-5 py-2 border border-gray-700 mb-8 text-gray-400 rounded-sm shadow-inner uppercase tracking-widest">Click the red glowing words in the parchment to discover their meanings and talk.</p>
+
+                    <div class="flex flex-col lg:flex-row gap-8 w-full max-w-6xl items-start">
+                        
+                        <!-- The Parchment -->
+                        <div class="elder-scroll-container flex-1 p-8 md:p-12">
+                            <p class="text-xl md:text-3xl font-lore leading-[2em] text-[#450a0a]">
+                                "It's time. To take back what was <span class="script-word" onclick="readScriptWord(this, 'STOLEN', 'Taken without permission.', 'Have you ever had something stolen from you in a game or real life?')">stolen</span>. So, you're finally here. You <span class="script-word" onclick="readScriptWord(this, 'WERE EXPECTING', 'Waiting for something or someone to arrive.', 'Do you like surprises, or do you prefer to know what to expect?')">were expecting</span> me? You Greymanes are a hard lot to kill. <span class="script-word" onclick="readScriptWord(this, 'CLAWING', 'Using hands or nails to fight hard and climb back.', 'When a game is very difficult, do you keep fighting or do you quit?')">Clawing</span> your way back from <span class="script-word" onclick="readScriptWord(this, `DEATH'S DOOR`, `Very close to dying.`, `Have you ever survived a boss fight with 1% HP? How did it feel?`)">death's door</span> over and over. How do you do it? Let's find out, shall we?"
+                            </p>
+                        </div>
+
+                        <!-- Side Info Panel -->
+                        <div id="script-info-panel" class="w-full lg:w-1/3 ws-panel p-6 hidden flex-col">
+                            <h3 id="script-word-title" class="font-epic text-3xl text-ws-crimson border-b border-ws-crimson/30 pb-2 mb-4">WORD</h3>
+                            <p id="script-word-def" class="text-lg font-lore text-gray-300 mb-6 bg-black/40 p-4 rounded-sm border border-gray-700 italic">Definition goes here.</p>
+                            
+                            <div class="bg-ws-crimson/10 p-4 border-l-4 border-ws-crimson rounded-sm">
+                                <p class="font-ui text-ws-crimson font-bold uppercase tracking-widest text-sm mb-2"><i class="fas fa-comments mr-2"></i> Let's Talk:</p>
+                                <p id="script-word-question" class="text-lg font-lore text-white">Question goes here.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="nav-bar">
+                    <button onclick="prevPage()" class="text-gray-500 hover:text-white uppercase font-epic tracking-widest transition text-lg"><i class="fas fa-arrow-left mr-2"></i> Back</button>
+                    <button onclick="nextPage()" class="ws-btn px-10 py-4 text-xl">NEXT <i class="fas fa-arrow-right ml-3"></i></button>
+                </div>
+            </section>
+
+            <!-- PAGE 10: GRAMMAR INTRO (PAST CONTINUOUS 1) -->
+            <section class="level">
+                <div class="page-content">
+                    <h2 class="font-ui font-bold tracking-widest mb-2 uppercase text-sm text-ws-gold">Guild Rules</h2>
+                    <h1 class="text-3xl md:text-5xl font-bold font-epic text-white mb-8 tracking-tight">PAST CONTINUOUS</h1>
+                    
+                    <div class="ws-panel p-8 max-w-3xl mx-auto w-full text-left shadow-lg border-l-4 border-ws-gold">
+                        <p class="text-2xl font-bold mb-6 text-white font-lore">We use the <span class="text-ws-gold font-epic">PAST CONTINUOUS</span> to talk about an action that was <strong class="underline">in progress</strong> at a specific time in the past.</p>
+                        
+                        <div class="bg-black/80 p-6 rounded-sm space-y-5 font-lore shadow-inner border border-gray-700">
+                            <p class="text-lg text-gray-300 font-ui tracking-widest">Structure: Subject + WAS / WERE + Verb-ing</p>
+                            
+                            <div class="border-t border-gray-700 pt-4 mt-4">
+                                <p class="text-2xl text-white font-bold mb-2">
+                                    "I <span class="text-ws-gold">was fighting</span> the boss yesterday." <span class="text-gray-400 font-normal text-sm font-ui">(I, He, She, It -> WAS)</span>
+                                </p>
+                                <p class="text-2xl text-white font-bold mb-2">
+                                    "They <span class="text-ws-gold">were expecting</span> me." <span class="text-gray-400 font-normal text-sm font-ui">(You, We, They -> WERE)</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-bar">
+                    <button onclick="prevPage()" class="text-gray-500 hover:text-white uppercase font-epic tracking-widest transition text-lg"><i class="fas fa-arrow-left mr-2"></i> Back</button>
+                    <button onclick="nextPage()" class="ws-btn px-12 py-5 text-xl">NEXT RULE <i class="fas fa-arrow-right ml-3"></i></button>
+                </div>
+            </section>
+
+            <!-- PAGE 11: GRAMMAR INTRO (PAST CONTINUOUS NEG/Q) -->
+            <section class="level">
+                <div class="page-content">
+                    <h2 class="font-ui font-bold tracking-widest mb-2 uppercase text-sm text-ws-steel">Guild Rules</h2>
+                    <h1 class="text-3xl md:text-5xl font-bold font-epic text-white mb-8 tracking-tight">Negative & Question</h1>
+                    
+                    <div class="ws-panel p-8 max-w-3xl mx-auto w-full text-left shadow-lg border-l-4 border-ws-steel">
+                        
+                        <div class="bg-black/80 p-6 rounded-sm space-y-5 font-lore shadow-inner border border-gray-700">
+                            <p class="text-xl text-ws-steel font-ui tracking-widest font-bold">NEGATIVE (Wasn't / Weren't)</p>
+                            <p class="text-2xl text-white font-bold mb-6">
+                                "He <span class="text-ws-steel">wasn't looking</span> when I attacked."
+                            </p>
+                            
+                            <div class="border-t border-gray-700 pt-6 mt-4">
+                                <p class="text-xl text-ws-steel font-ui tracking-widest font-bold">QUESTIONS (Invert Was/Were)</p>
+                                <p class="text-2xl text-white font-bold mb-2">
+                                    "<span class="text-ws-steel">Were</span> you <span class="text-ws-steel">expecting</span> me?"
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-bar">
+                    <button onclick="prevPage()" class="text-gray-500 hover:text-white uppercase font-epic tracking-widest transition text-lg"><i class="fas fa-arrow-left mr-2"></i> Back</button>
+                    <button onclick="nextPage()" class="ws-btn px-12 py-5 text-xl">ENTER TRIALS <i class="fas fa-fist-raised ml-3"></i></button>
+                </div>
+            </section>
+
+            <!-- PAGE 12: TRIAL 1 (CHOOSE OPTION) -->
+            <section class="level">
+                <div class="page-content">
+                    <div class="max-w-4xl w-full">
+                        <h2 class="font-epic text-3xl md:text-4xl text-white mb-8 text-center tracking-widest uppercase">TRIAL I: THE AMBUSH</h2>
+                        <div class="ws-panel p-10 md:p-14 w-full text-center bg-black/50 border-t-4 border-t-ws-crimson">
+                            <p class="text-xl md:text-2xl text-gray-300 mb-8 font-lore">What was Macduff doing when the enemy attacked? Choose the correct tense:</p>
+                            <div class="bg-black/80 p-8 rounded border border-gray-700 mb-8 shadow-inner">
+                                <p class="text-2xl md:text-4xl text-white font-bold tracking-wide font-lore italic">"Macduff ________ his sword when he heard the noise."</p>
+                            </div>
+                            <div class="grid grid-cols-1 gap-4 max-w-xl mx-auto font-epic">
+                                <button onclick="checkTrialAnswer(this, false)" class="ws-btn dark py-5 text-2xl text-center rounded">A) were cleaning</button>
+                                <button onclick="checkTrialAnswer(this, true)" class="ws-btn dark py-5 text-2xl text-center rounded">B) was cleaning</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-bar">
+                    <button onclick="prevPage()" class="text-gray-500 hover:text-white uppercase font-epic tracking-widest transition text-lg"><i class="fas fa-arrow-left mr-2"></i> Back</button>
+                    <button onclick="nextPage()" class="ws-btn px-10 py-4 text-xl">CONTINUE <i class="fas fa-arrow-right ml-3"></i></button>
+                </div>
+            </section>
+
+            <!-- PAGE 13: TRIAL 2 (CHOOSE OPTION 2) -->
+            <section class="level">
+                <div class="page-content">
+                    <div class="max-w-4xl w-full">
+                        <h2 class="font-epic text-3xl md:text-4xl text-white mb-8 text-center tracking-widest uppercase">TRIAL II: THE BOSS</h2>
+                        <div class="ws-panel p-10 md:p-14 w-full text-center bg-black/50 border-t-4 border-t-ws-gold">
+                            <p class="text-xl md:text-2xl text-gray-300 mb-8 font-lore">The boss asks Macduff a question about the past. Choose the correct form:</p>
+                            <div class="bg-black/80 p-8 rounded border border-gray-700 mb-8 shadow-inner">
+                                <p class="text-2xl md:text-4xl text-white font-bold tracking-wide font-lore italic">"________ you ________ me?"</p>
+                            </div>
+                            <div class="grid grid-cols-1 gap-4 max-w-xl mx-auto font-epic">
+                                <button onclick="checkTrialAnswer(this, false)" class="ws-btn dark py-5 text-2xl text-center rounded">A) Was / expecting</button>
+                                <button onclick="checkTrialAnswer(this, true)" class="ws-btn dark py-5 text-2xl text-center rounded">B) Were / expecting</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-bar">
+                    <button onclick="prevPage()" class="text-gray-500 hover:text-white uppercase font-epic tracking-widest transition text-lg"><i class="fas fa-arrow-left mr-2"></i> Back</button>
+                    <button onclick="nextPage()" class="ws-btn px-10 py-4 text-xl">CONTINUE <i class="fas fa-arrow-right ml-3"></i></button>
+                </div>
+            </section>
+
+            <!-- PAGE 14: TRIAL III (LOCKPICKING MINIGAME) -->
+            <section class="level">
+                <div class="page-content">
+                    <h2 class="font-epic text-3xl md:text-4xl text-ws-steel mb-6 text-center tracking-widest uppercase">TRIAL III: LOCKPICKING</h2>
+                    <p class="text-gray-300 text-xl font-lore mb-8 text-center">You found a locked chest! Order the grammatical words correctly to pick the lock.</p>
+                    
+                    <div class="ws-panel p-10 w-full max-w-5xl text-center bg-black/60 border border-ws-steel shadow-[0_0_30px_rgba(148,163,184,0.1)]">
+                        
+                        <!-- Lock Visual -->
+                        <div class="lock-container">
+                            <div class="lock-circle" id="lock-spin"></div>
+                            <div class="lock-inner" id="lock-core">
+                                <i class="fas fa-key text-4xl text-ws-gold" id="key-icon"></i>
+                            </div>
+                        </div>
+
+                        <div id="sentence-display" class="min-h-[4rem] border-b-2 border-dashed border-ws-steel bg-black/80 mb-10 flex flex-wrap gap-4 items-center justify-center text-3xl font-lore font-bold text-white p-4 transition-all rounded shadow-inner"></div>
+
+                        <div id="word-bank" class="flex flex-wrap justify-center gap-4 max-w-3xl mx-auto">
+                            <button class="word-bank-btn rounded-sm" onclick="selectWordBank(this)">You</button>
+                            <button class="word-bank-btn rounded-sm" onclick="selectWordBank(this)">were</button>
+                            <button class="word-bank-btn rounded-sm" onclick="selectWordBank(this)">expecting</button>
+                            <button class="word-bank-btn rounded-sm" onclick="selectWordBank(this)">me?</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-bar">
+                    <button onclick="prevPage()" class="text-gray-500 hover:text-white uppercase font-epic tracking-widest transition text-lg"><i class="fas fa-arrow-left mr-2"></i> Back</button>
+                    <button onclick="resetWordBank()" class="text-gray-500 hover:text-white uppercase font-epic tracking-widest transition text-lg"><i class="fas fa-undo mr-2"></i> Reset Lock</button>
+                    <button onclick="nextPage()" class="ws-btn px-10 py-4 text-xl">CONTINUE <i class="fas fa-arrow-right ml-3"></i></button>
+                </div>
+            </section>
+
+            <!-- PAGE 15: ETHICAL PROTOCOL -->
+            <section class="level">
+                <div class="page-content">
+                    <div class="w-full max-w-5xl">
+                        <h2 class="text-4xl font-epic text-ws-gold mb-10 text-center tracking-widest">THE MERCENARY CODE</h2>
+                        <div class="ws-panel p-12 md:p-16 w-full text-center bg-black/60 relative">
+                            <h3 class="text-3xl md:text-4xl text-white mb-16 font-lore leading-tight italic">"A mercenary should only fight for money. If there is no contract, you don't fight."</h3>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full font-epic uppercase tracking-widest text-lg">
+                                <button onclick="selectStance(this)" data-stance="strong-agree" class="ws-btn dark py-4 rounded hover:border-ws-gold transition">Strongly Agree</button>
+                                <button onclick="selectStance(this)" data-stance="agree" class="ws-btn dark py-4 rounded hover:border-ws-gold transition">Agree</button>
+                                <button onclick="selectStance(this)" data-stance="disagree" class="ws-btn dark py-4 rounded hover:border-ws-crimson transition">Disagree</button>
+                                <button onclick="selectStance(this)" data-stance="strong-disagree" class="ws-btn dark py-4 rounded hover:border-ws-crimson transition">Strongly Disagree</button>
+                            </div>
+
+                            <div id="stance-followup" class="hidden mt-12 bg-black/80 p-8 rounded border border-gray-700 text-left">
+                                <i class="fas fa-microphone-alt text-3xl text-ws-gold mb-4"></i>
+                                <p class="text-2xl text-white font-ui font-bold">Defend your honor! <span class="text-ws-gold">Explain your choice to the guild.</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-bar">
+                    <button onclick="prevPage()" class="text-gray-500 hover:text-white uppercase font-epic tracking-widest transition text-lg"><i class="fas fa-arrow-left mr-2"></i> Back</button>
+                    <button onclick="nextPage()" class="ws-btn px-10 py-4 text-xl">ENTER COMBAT <i class="fas fa-fist-raised ml-3"></i></button>
+                </div>
+            </section>
+
+            <!-- PAGE 16: ROLEPLAY INTRO -->
+            <section class="level">
+                <div class="page-content">
+                    <div class="w-full max-w-5xl">
+                        <h2 class="text-5xl md:text-6xl font-epic text-ws-crimson mb-10 text-center tracking-widest drop-shadow-[0_0_15px_rgba(153,27,27,0.5)]">PHASE VI: AMBUSH</h2>
+                        <div class="ws-panel p-16 w-full text-center border-t-4 border-t-ws-crimson bg-[radial-gradient(ellipse_at_center,rgba(153,27,27,0.1)_0%,transparent_70%)] relative overflow-hidden">
+                            <i class="fas fa-skull text-9xl text-white/5 absolute -bottom-10 -right-10"></i>
+                            <p class="text-3xl text-white mb-8 leading-relaxed font-epic font-bold">
+                                "You finally found the bandit leader, The White Horn. He is waiting for you in the ruins."
+                            </p>
+                            <p class="text-xl text-gray-400 mb-12 font-lore italic">Use your grammar to survive.</p>
+                            <button onclick="nextPage()" class="ws-btn red border-2 px-12 py-5 text-2xl rounded">DRAW WEAPON <i class="fas fa-khanda ml-4"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-bar">
+                    <button onclick="prevPage()" class="text-gray-500 hover:text-white uppercase font-epic tracking-widest transition text-lg"><i class="fas fa-arrow-left mr-2"></i> Back</button>
+                    <div class="w-32"></div>
+                </div>
+            </section>
+
+            <!-- PAGE 17: ROLEPLAY 1 (The Boss) -->
+            <section class="level">
+                <div class="page-content">
+                    <h2 class="font-ui font-bold tracking-widest mb-2 uppercase text-sm text-ws-gold animate-pulse">Roleplay</h2>
+                    <h1 class="text-4xl md:text-5xl font-bold font-epic text-white mb-8 tracking-tight">The White Horn</h1>
+                    
+                    <div class="flex flex-col md:flex-row gap-6 w-full max-w-5xl mx-auto">
+                        <div class="flex-1 ws-panel p-8 flex flex-col justify-center text-left border-t-4 border-ws-crimson bg-black/60 shadow-2xl">
+                            <h3 class="text-2xl font-bold mb-2 uppercase text-ws-crimson font-epic">Teacher</h3>
+                            <p class="text-xs tracking-widest mb-6 font-bold uppercase font-ui text-gray-500">Plays: Boss</p>
+                            <p class="text-2xl italic mb-4 font-bold text-slate-200">"So, you're finally here. You Greymanes are a hard lot to kill. Were you following me?"</p>
+                        </div>
+                        
+                        <div class="flex-1 ws-panel p-8 flex flex-col justify-center text-left border-t-4 border-ws-gold shadow-[0_0_20px_rgba(217,119,6,0.15)]">
+                            <h3 class="text-2xl font-bold mb-2 uppercase text-ws-gold font-epic">Student</h3>
+                            <p class="text-xs tracking-widest mb-6 font-bold uppercase font-ui text-gray-500">Plays: The Hero</p>
+                            <p class="text-lg font-bold text-gray-400 mb-2">Answer (Use Past Continuous):</p>
+                            <p class="text-2xl italic font-bold text-white">"Yes. I <span class="text-ws-gold underline decoration-2">was looking</span> for you all day."</p>
+                            
+                            <!-- Class Prompts -->
+                            <div id="prompt-warrior" class="class-speech-prompt hidden mt-6 border-l-4 border-ws-steel bg-slate-900/50 p-4 rounded">
+                                <p class="text-ws-steel font-epic tracking-widest mb-1 text-sm"><i class="fas fa-khanda"></i> WARRIOR</p>
+                                <p class="text-white font-lore text-lg">"Come and fight me face-to-face!"</p>
+                            </div>
+                            <div id="prompt-ranger" class="class-speech-prompt hidden mt-6 border-l-4 border-green-500 bg-green-900/20 p-4 rounded">
+                                <p class="text-green-500 font-epic tracking-widest mb-1 text-sm"><i class="fas fa-bow-arrow"></i> RANGER</p>
+                                <p class="text-white font-lore text-lg">"My arrow is already pointing at your head."</p>
+                            </div>
+                            <div id="prompt-defender" class="class-speech-prompt hidden mt-6 border-l-4 border-ws-gold bg-yellow-900/20 p-4 rounded">
+                                <p class="text-ws-gold font-epic tracking-widest mb-1 text-sm"><i class="fas fa-shield-alt"></i> DEFENDER</p>
+                                <p class="text-white font-lore text-lg">"You cannot pass my shield."</p>
+                            </div>
+                            <div id="prompt-mage" class="class-speech-prompt hidden mt-6 border-l-4 border-ws-magic bg-purple-900/20 p-4 rounded">
+                                <p class="text-ws-magic font-epic tracking-widest mb-1 text-sm"><i class="fas fa-hat-wizard"></i> MAGE</p>
+                                <p class="text-white font-lore text-lg">"My fireballs are ready for you!"</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-bar">
+                    <button onclick="prevPage()" class="text-gray-500 hover:text-white uppercase font-epic tracking-widest transition text-lg"><i class="fas fa-arrow-left mr-2"></i> Back</button>
+                    <button onclick="addXP(10); nextPage()" class="ws-btn px-10 py-4 text-xl">NEXT MOVE <i class="fas fa-arrow-right ml-3"></i></button>
+                </div>
+            </section>
+
+            <!-- PAGE 18: ROLEPLAY 2 (The Boss again) -->
+            <section class="level">
+                <div class="page-content">
+                    <h2 class="font-ui font-bold tracking-widest mb-2 uppercase text-sm text-ws-steel animate-pulse">Roleplay</h2>
+                    <h1 class="text-4xl md:text-5xl font-bold font-epic text-white mb-8 tracking-tight">The Fight</h1>
+                    
+                    <div class="flex flex-col md:flex-row gap-6 w-full max-w-5xl mx-auto">
+                        <div class="flex-1 ws-panel p-8 flex flex-col justify-center text-left border-t-4 border-ws-steel bg-black/60 shadow-2xl">
+                            <h3 class="text-2xl font-bold mb-2 uppercase text-ws-steel font-epic">Teacher</h3>
+                            <p class="text-xs tracking-widest mb-6 font-bold uppercase font-ui text-gray-500">Plays: Boss</p>
+                            <p class="text-2xl italic mb-4 font-bold text-slate-200">"Ha! I thought you were dead! Why weren't you protecting your friends?"</p>
+                        </div>
+                        
+                        <div class="flex-1 ws-panel p-8 flex flex-col justify-center text-left border-t-4 border-ws-gold shadow-[0_0_20px_rgba(217,119,6,0.15)]">
+                            <h3 class="text-2xl font-bold mb-2 uppercase text-ws-gold font-epic">Student</h3>
+                            <p class="text-xs tracking-widest mb-6 font-bold uppercase font-ui text-gray-500">Plays: The Hero</p>
+                            <p class="text-lg font-bold text-gray-400 mb-2">Answer (Use Negative Past Continuous):</p>
+                            <p class="text-2xl italic font-bold text-white">"I <span class="text-ws-gold underline decoration-2">wasn't protecting</span> them because I wanted to find you!"</p>
+                            
+                            <div class="speaking-starter mt-6">"It's time to take back what was stolen!"</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-bar">
+                    <button onclick="prevPage()" class="text-gray-500 hover:text-white uppercase font-epic tracking-widest transition text-lg"><i class="fas fa-arrow-left mr-2"></i> Back</button>
+                    <button onclick="addXP(10); nextPage()" class="ws-btn px-10 py-4 text-xl">FINISH CONTRACT <i class="fas fa-check ml-3"></i></button>
+                </div>
+            </section>
+
+            <!-- PAGE 19: MISSION SUCCESS -->
+            <section class="level">
+                <div class="page-content">
+                    <div class="w-full max-w-5xl text-center flex flex-col items-center">
+                        <i class="fas fa-sun text-[8rem] text-ws-gold mb-8 drop-shadow-[0_0_50px_rgba(217,119,6,0.6)]"></i>
+                        <h2 class="text-5xl md:text-7xl font-epic font-bold text-white mb-8 tracking-tight">CONTRACT COMPLETE</h2>
+                        <div class="ws-panel p-10 md:p-14 bg-black/60 border border-ws-gold/30 max-w-4xl w-full shadow-inner">
+                            <p class="text-2xl md:text-3xl text-gray-200 font-lore leading-relaxed mb-8">
+                                You defeated the White Horn and took back what was stolen. The guild respects your strength.
+                            </p>
+                            <div class="bg-black/90 p-8 rounded border border-gray-700 text-left">
+                                <p class="text-ws-gold font-bold text-lg mb-4 tracking-widest uppercase font-epic">🗣️ Final Question:</p>
+                                <p class="text-2xl text-white font-lore mb-4 italic">Would you like to play Crimson Desert when it launches?</p>
+                                <div class="speaking-starter">"Yes, because..." / "No, because..."</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-bar">
+                    <button onclick="prevPage()" class="text-gray-500 hover:text-white uppercase font-epic tracking-widest transition text-lg"><i class="fas fa-arrow-left mr-2"></i> Back</button>
+                    <button onclick="nextPage()" class="ws-btn px-12 py-5 text-2xl shadow-[0_0_30px_rgba(217,119,6,0.4)]">CLAIM REWARD <i class="fas fa-coins ml-3"></i></button>
+                </div>
+            </section>
+
+            <!-- PAGE 20: HOMEWORK / SIDE QUEST -->
+            <section class="level">
+                <div class="page-content">
+                    <h2 class="font-ui font-bold tracking-widest mb-2 uppercase text-sm text-ws-steel">Assignment</h2>
+                    <h1 class="text-3xl md:text-5xl font-bold font-epic text-white mb-8 tracking-tight">Guild Orders</h1>
+                    
+                    <div class="ws-panel p-8 max-w-3xl mx-auto w-full relative bg-black border border-ws-steel text-left">
+                        <div class="absolute -top-3 -right-3 bg-ws-steel text-black font-bold uppercase tracking-widest px-3 py-1 text-xs font-epic">HOMEWORK</div>
+                        <p class="text-xl font-bold mb-4 text-white font-ui tracking-wide">
+                            "Write 4 sentences about your last game."
+                        </p>
+                        <ul class="list-disc pl-5 text-lg font-bold space-y-2 text-gray-400 font-lore">
+                            <li>Write 2 sentences using <strong class="text-ws-gold">Past Continuous</strong> (e.g. "I was fighting a dragon.").</li>
+                            <li>Write 2 sentences using <strong class="text-ws-steel">Past Continuous Negative</strong> (e.g. "I wasn't using a shield.").</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="nav-bar">
+                    <button onclick="prevPage()" class="text-gray-500 hover:text-white uppercase font-epic tracking-widest transition text-lg"><i class="fas fa-arrow-left mr-2"></i> Back</button>
+                    <button onclick="nextPage()" class="ws-btn px-12 py-5 text-xl">REST AT TAVERN <i class="fas fa-bed ml-3"></i></button>
+                </div>
+            </section>
+
+            <!-- PAGE 21: SAVE POINT / RATING -->
+            <section class="level">
+                <div class="page-content items-center text-center">
+                    <h2 class="font-ui font-bold tracking-widest mb-2 uppercase text-xs text-ws-gold">Mercenary Guild</h2>
+                    <h1 class="text-5xl md:text-7xl font-black font-epic text-white mb-10 tracking-tight">LOG OUT</h1>
+
+                    <div class="space-y-4 max-w-xl w-full text-lg font-bold text-left mb-10 text-gray-300 font-ui tracking-wide">
+                        <label class="flex items-center gap-4 p-4 ws-panel bg-black rounded-sm border border-gray-700">
+                            <input type="checkbox" class="w-5 h-5 accent-ws-gold" checked disabled>
+                            <span class="mt-1 text-white">Past Continuous Learned.</span>
+                        </label>
+                        <label class="flex items-center gap-4 p-4 ws-panel bg-black rounded-sm border border-gray-700">
+                            <input type="checkbox" class="w-5 h-5 accent-ws-gold" checked disabled>
+                            <span class="mt-1 text-white">RPG Vocab Scanned.</span>
+                        </label>
+                    </div>
+
+                    <div class="border-t border-gray-800 pt-8 w-full flex flex-col items-center max-w-2xl mx-auto">
+                        <p class="mb-5 text-lg font-bold text-gray-400 uppercase tracking-widest font-epic">Rate your adventure:</p>
+                        <div class="flex justify-center gap-3 md:gap-6 mb-6">
+                            <button onclick="rate(1)" class="game-rating text-5xl grayscale opacity-30 hover:scale-110 transition-transform filter drop-shadow-md">⚔️</button>
+                            <button onclick="rate(2)" class="game-rating text-5xl grayscale opacity-30 hover:scale-110 transition-transform filter drop-shadow-md">⚔️</button>
+                            <button onclick="rate(3)" class="game-rating text-5xl grayscale opacity-30 hover:scale-110 transition-transform filter drop-shadow-md">⚔️</button>
+                            <button onclick="rate(4)" class="game-rating text-5xl grayscale opacity-30 hover:scale-110 transition-transform filter drop-shadow-md">⚔️</button>
+                            <button onclick="rate(5)" class="game-rating text-5xl grayscale opacity-30 hover:scale-110 transition-transform filter drop-shadow-md">⚔️</button>
+                        </div>
+                        <div id="rat-hub" class="hidden p-3 ws-panel bg-black rounded-sm font-bold text-sm text-center uppercase tracking-widest text-ws-gold w-max mx-auto font-ui border border-ws-gold/30">> ADVENTURE RATED <span id="star-c" class="text-white mx-2 font-bold text-xl"></span></div>
+                        
+                        <button onclick="location.reload();" class="mt-10 ws-btn py-3 px-8 text-lg">
+                            RESTART
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <footer class="fixed bottom-0 left-0 w-full h-10 bg-[#0a0a0a] border-t-2 border-[#1c140d] z-40 flex items-center justify-center px-4 md:px-6 transition-colors">
+        <div class="flex-1 flex flex-col items-center justify-center px-4 md:px-12">
+            <div class="flex justify-between w-full max-w-xl mb-1">
+                <span class="text-[10px] font-ui text-gray-500 font-bold tracking-widest uppercase">Quest Progress</span>
+                <span class="text-[10px] font-ui text-white font-bold tracking-widest uppercase">STAGE <span id="level-num" class="text-ws-gold text-xs mx-1">1</span>/21</span>
+            </div>
+            <div class="w-full max-w-xl bg-gray-900 h-1.5 rounded-sm overflow-hidden border border-[#3f2c1d] shadow-inner">
+                <div id="xp-bar" class="h-full bg-ws-gold w-0 transition-all duration-500 shadow-[0_0_10px_#d97706]"></div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- 1. Pagination Logic ---
+        let currentLevel = 0;
+        const levels = document.querySelectorAll('.level');
+        const totalLevels = levels.length; 
+
+        function updateUI() {
+            document.getElementById('level-num').innerText = (currentLevel + 1);
+            const xpBar = document.getElementById('xp-bar');
+            if(totalLevels > 1) xpBar.style.width = `${(currentLevel / (totalLevels - 1)) * 100}%`;
+            
+            const iframes = document.querySelectorAll('iframe');
+            iframes.forEach(iframe => { const src = iframe.src; iframe.src = src; });
+            document.querySelector('main').scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goToLevel(i) {
+            if (i < 0 || i >= totalLevels) return;
+            levels.forEach(l => l.classList.remove('active'));
+            currentLevel = i;
+            levels[currentLevel].classList.add('active');
+            updateUI();
+        }
+
+        function nextPage() { goToLevel(currentLevel + 1); }
+        function prevPage() { goToLevel(currentLevel - 1); }
+
+        document.addEventListener('keydown', (e) => {
+            if(e.key === 'ArrowRight') nextPage();
+            if(e.key === 'ArrowLeft') prevPage();
+        });
+
+        // --- 2. START & TOOLS ---
+        function pressStart() {
+            document.getElementById('start-btn').classList.add('hidden');
+            document.getElementById('loading-ui').classList.remove('hidden');
+            document.getElementById('loading-ui').classList.add('flex');
+            setTimeout(() => {
+                const screen = document.getElementById('loading-screen');
+                screen.style.opacity = '0';
+                setTimeout(() => { screen.style.display = 'none'; }, 800);
+            }, 2000); 
+        }
+
+        function toggleFullscreen() {
+            const doc = window.document;
+            const docEl = doc.documentElement;
+            const req = docEl.requestFullscreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+            const exit = doc.exitFullscreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+            try {
+                if (!doc.fullscreenElement) { req ? req.call(docEl) : null; } 
+                else { exit ? exit.call(doc) : null; }
+            } catch (err) {}
+        }
+
+        function toggleNotes() {
+            const notes = document.getElementById('notes-panel');
+            notes.classList.toggle('translate-x-full');
+            notes.classList.toggle('-translate-x-full');
+        }
+
+        function toggleTools() {
+            const panel = document.getElementById('tools-panel');
+            panel.classList.toggle('hidden');
+            panel.classList.toggle('flex');
+        }
+
+        function triggerPraise(main, icon) {
+            const popup = document.getElementById('praise-popup');
+            document.getElementById('praise-text').innerText = main;
+            document.getElementById('praise-icon').innerText = icon;
+            popup.classList.remove('hidden');
+            popup.classList.remove('toast-anim');
+            void popup.offsetWidth; 
+            popup.classList.add('toast-anim');
+            setTimeout(() => { popup.classList.add('hidden'); }, 3000); 
+        }
+
+        // --- 3. CLASS & XP & HP ---
+        let playerClass = "";
+        let playerName = "Mercenary";
+        let hp = 3;
+        let coins = 0;
+
+        function selectClass(className, iconClass, btnElement) {
+            document.querySelectorAll('.class-card').forEach(c => c.classList.remove('selected'));
+            btnElement.classList.add('selected');
+            playerClass = className;
+            document.getElementById('btn-confirm-char').disabled = false;
+            document.getElementById('btn-confirm-char').classList.remove('disabled-btn');
+        }
+
+        function confirmCharacter() {
+            const nameInput = document.getElementById('player-name-input').value.trim();
+            if(nameInput) playerName = nameInput;
+            document.getElementById('hud-player-name').innerText = `${playerName} [${playerClass}]`;
+            
+            document.querySelectorAll('.class-speech-prompt').forEach(el => el.classList.add('hidden'));
+            const p = document.getElementById(`prompt-${playerClass.toLowerCase()}`);
+            if(p) p.classList.remove('hidden');
+
+            addXP(10);
+            nextPage();
+        }
+
+        function addXP(amount) {
+            coins += amount;
+            const xpCounter = document.getElementById('xp-counter');
+            xpCounter.innerText = `${coins} COINS`;
+            xpCounter.classList.add('text-ws-gold', 'scale-125');
+            setTimeout(() => xpCounter.classList.remove('text-ws-gold', 'scale-125'), 300);
+        }
+
+        function damageArmor() {
+            if(hp > 0) {
+                const hpIcon = document.getElementById(`hp-${hp}`);
+                if(hpIcon) {
+                    hpIcon.classList.replace('text-ws-crimson', 'text-gray-700');
+                    hpIcon.classList.remove('drop-shadow-[0_0_5px_#991b1b]');
+                }
+                hp--;
+            }
+            const overlay = document.getElementById('damage-overlay');
+            overlay.classList.remove('hidden', 'take-damage');
+            void overlay.offsetWidth;
+            overlay.classList.add('take-damage', 'block');
+            setTimeout(() => overlay.classList.remove('block', 'take-damage'), 500);
+        }
+
+        // --- Interactive Looting (Page 5) ---
+        let lootedItems = 0;
+        function lootItem(el, title, desc, ex) {
+            if(el.classList.contains('looted')) return;
+            el.classList.add('looted');
+            
+            const display = document.getElementById('loot-display');
+            display.innerHTML = `
+                <div class="fade-in text-left">
+                    <h3 class="font-epic text-2xl text-ws-gold mb-2">${title}</h3>
+                    <p class="font-lore text-lg text-white mb-2">${desc}</p>
+                    <p class="font-lore text-sm text-gray-400 italic">"${ex}"</p>
+                </div>
+            `;
+            display.classList.remove('hidden');
+            
+            triggerPraise('LOOT ACQUIRED', '🎒');
+            addXP(5);
+            lootedItems++;
+            
+            if(lootedItems === 3) {
+                document.getElementById('btn-loot-next').classList.remove('hidden');
+            }
+        }
+
+        // --- Interactive Script (Page 9) ---
+        function readScriptWord(el, title, desc, question) {
+            // Remove active from all
+            document.querySelectorAll('.script-word').forEach(w => w.classList.remove('active-word'));
+            el.classList.add('active-word');
+
+            const panel = document.getElementById('script-info-panel');
+            document.getElementById('script-word-title').innerText = title;
+            document.getElementById('script-word-def').innerText = desc;
+            document.getElementById('script-word-question').innerText = question;
+            
+            panel.classList.remove('hidden');
+            panel.classList.add('flex', 'fade-in');
+            
+            addXP(5);
+        }
+
+        function checkTrialAnswer(btn, isCorrect) {
+            const siblings = btn.parentElement.children;
+            for(let s of siblings) {
+                s.classList.remove('bg-ws-gold', 'text-black');
+                s.classList.add('bg-dark', 'text-white');
+            }
+            if(isCorrect) {
+                btn.classList.replace('bg-dark', 'bg-ws-gold');
+                btn.classList.replace('text-white', 'text-black');
+                addXP(10);
+                triggerPraise('CORRECT', '✔️');
+            } else {
+                btn.classList.replace('bg-dark', 'bg-ws-crimson');
+                btn.classList.replace('text-white', 'text-white');
+                damageArmor();
+                setTimeout(() => {
+                    btn.classList.replace('bg-ws-crimson', 'bg-dark');
+                }, 1000);
+            }
+        }
+
+        function checkScript(btn, isCorrect, targetId, word) {
+            const btnsContainer = btn.parentElement;
+            if(isCorrect) {
+                triggerPraise('AUDIO RESTORED', '💬');
+                const blank = document.getElementById(targetId);
+                blank.classList.remove('text-transparent', 'border-b-4', 'border-ws-gold', 'border-ws-crimson', 'px-8');
+                blank.classList.add('text-ws-gold', 'px-2', 'drop-shadow-[0_0_5px_#d97706]');
+                blank.innerText = word;
+                btnsContainer.style.display = 'none';
+                addXP(10);
+            } else {
+                damageArmor();
+                btnsContainer.classList.add('opacity-30');
+                setTimeout(() => btnsContainer.classList.remove('opacity-30'), 400);
+            }
+        }
+
+        // --- Lockpicking Mechanic ---
+        let selectedWords = [];
+        const targetSentence = ["You", "were", "expecting", "me?"];
+        function selectWordBank(btn) {
+            const word = btn.innerText;
+            selectedWords.push({word: word, btn: btn});
+            btn.classList.add('hidden-word');
+            renderSentence();
+            
+            // Spin lock visual
+            document.getElementById('lock-spin').style.animationDuration = '1s';
+            setTimeout(()=> document.getElementById('lock-spin').style.animationDuration = '4s', 500);
+
+            let isCorrectSoFar = true;
+            for(let i=0; i<selectedWords.length; i++) {
+                if(selectedWords[i].word !== targetSentence[i]) isCorrectSoFar = false;
+            }
+
+            const display = document.getElementById('sentence-display');
+            if(!isCorrectSoFar) {
+                display.classList.add('text-ws-crimson', 'border-ws-crimson');
+                display.classList.replace('text-white', 'text-ws-crimson');
+                damageArmor();
+                setTimeout(() => {
+                    display.classList.remove('text-ws-crimson', 'border-ws-crimson');
+                    display.classList.replace('text-ws-crimson', 'text-white');
+                    resetWordBank();
+                }, 600);
+            } else if(selectedWords.length === targetSentence.length) {
+                display.classList.replace('text-white', 'text-ws-steel');
+                
+                // Unlock animation
+                document.getElementById('lock-core').classList.add('unlocked');
+                document.getElementById('key-icon').classList.replace('fa-key', 'fa-unlock');
+                document.getElementById('key-icon').classList.replace('text-ws-gold', 'text-white');
+
+                addXP(50);
+                triggerPraise('CHEST UNLOCKED', '🔓');
+            }
+        }
+
+        function renderSentence() {
+            const display = document.getElementById('sentence-display');
+            if(display) display.innerText = selectedWords.map(sw => sw.word).join(" ");
+        }
+
+        function resetWordBank() {
+            selectedWords.forEach(sw => sw.btn.classList.remove('hidden-word'));
+            selectedWords = [];
+            renderSentence();
+            const display = document.getElementById('sentence-display');
+            if(display) {
+                display.classList.replace('text-ws-steel', 'text-white');
+                document.getElementById('lock-core').classList.remove('unlocked');
+                document.getElementById('key-icon').classList.replace('fa-unlock', 'fa-key');
+                document.getElementById('key-icon').classList.replace('text-white', 'text-ws-gold');
+            }
+        }
+
+        function selectStance(btn) {
+            const siblings = btn.parentElement.children;
+            for(let s of siblings) {
+                s.classList.remove('bg-ws-gold', 'text-black', 'bg-ws-crimson', 'text-white', 'border-ws-gold', 'border-ws-crimson');
+                s.classList.add('bg-black', 'text-gray-400', 'border-gray-700');
+            }
+            if(btn.dataset.stance.includes('agree') && !btn.dataset.stance.includes('disagree')) {
+                 btn.classList.replace('bg-black', 'bg-ws-gold');
+                 btn.classList.replace('text-gray-400', 'text-black');
+                 btn.classList.replace('border-gray-700', 'border-ws-gold');
+            } else {
+                 btn.classList.replace('bg-black', 'bg-ws-crimson');
+                 btn.classList.replace('text-gray-400', 'text-white');
+                 btn.classList.replace('border-gray-700', 'border-ws-crimson');
+            }
+            document.getElementById('stance-followup').classList.remove('hidden');
+            addXP(10);
+        }
+
+        function rate(n) {
+            const drops = document.querySelectorAll('.game-rating');
+            drops.forEach((d, i) => {
+                d.classList.toggle('grayscale', i >= n);
+                d.classList.toggle('opacity-30', i >= n);
+                if(i < n) d.style.filter = "drop-shadow(0 0 10px #d97706)";
+                else d.style.filter = "none";
+            });
+            document.getElementById('rat-hub').classList.remove('hidden');
+            document.getElementById('star-c').innerText = n;
+        }
+
+        const notesTextarea = document.getElementById('class-notes');
+        if(localStorage.getItem('wolfstation_crimson_notes')) notesTextarea.value = localStorage.getItem('wolfstation_crimson_notes');
+        notesTextarea.addEventListener('input', () => localStorage.setItem('wolfstation_crimson_notes', notesTextarea.value));
+        
+        updateUI();
+    </script>
+</body>
+</html>
